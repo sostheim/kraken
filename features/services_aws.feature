@@ -11,8 +11,10 @@ Feature: Make sure we have the correct kubernetes services
       """
       .*
       grafana.*
+      heapster.*
       influxdb.*
       kube-dns.*
+      kube-ui.*
       kubernetes.*
-      kubernetes-ro.*
+      prometheus.*
       """
