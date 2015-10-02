@@ -1,0 +1,23 @@
+name: Kraken e2e tests
+markdown: redcarpet
+highlighter: pygments
+url: http://e2e.kubeme.io
+paginate: 10
+description:     Kraken conformance test results
+intro: Results of kubernetes conformance tests on Kraken AWS cluster
+logo:             logo.png
+disqus_shortname:
+# url: http://gotchacode.com
+#Comment out url when working locally to resolve base urls correctly
+#url:
+
+# Owner/author information
+owner:
+  name:           Samsung SDSRA
+  avatar:         https://avatars2.githubusercontent.com/u/11511065
+  email:          bob.wise@samsung.com
+  github:         https://github.com/Samsung-AG
+  stackexchange:
+
+# Links to include in top navigation
+# For external links add external: true

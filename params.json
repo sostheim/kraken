@@ -1,1 +1,0 @@
-{"name":"Kraken","tagline":"e2e conformance results","body":"# Kraken e2e conformance test results\r\n\r\nEvery merge to Kraken repository will now trigger a kubernetes conformance tests run on our Jenkins instance.\r\n\r\nAll results will be published here.\r\n\r\n","google":"","note":"Don't delete this file! It's used internally to help with page regeneration."}
