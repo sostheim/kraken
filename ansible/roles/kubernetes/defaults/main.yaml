@@ -86,6 +86,8 @@ kubelet:
   cluster-dns: "{{ dns_ip }}"
   cluster-domain: "{{ dns_domain }}"
   enable-debugging-handlers: true
+  # use rocket instead of docker
+  container-runtime: rkt
   # enable-server: false
   enable-server: true
   healthz-bind-address: 0.0.0.0
