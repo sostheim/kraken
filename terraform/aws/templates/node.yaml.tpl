@@ -63,9 +63,9 @@ coreos:
 
         [Service]
         ExecStartPre=-/usr/bin/mkdir -p /opt/bin
-        ExecStartPre=/usr/bin/wget -N -P /opt/bin https://github.com/coreos/rkt/releases/download/v0.8.1/rkt-v0.8.1.tar.gz
-        ExecStartPre=/usr/bin/tar -xvzf /opt/bin/rkt-v0.8.1.tar.gz --directory /opt/bin
-        ExecStart=/opt/bin/rkt-v0.8.1/rkt version
+        ExecStartPre=/usr/bin/wget -N -P /opt/bin ${rkt_pkg_source_location}/${rkt_pkg_name}
+        ExecStartPre=/usr/bin/tar -xvzf /opt/bin/${rkt_pkg_name} --directory /opt/bin
+        ExecStart=/opt/bin/${rkt_version}/rkt version
         RemainAfterExit=yes
         Type=oneshot
     - name: format-storage.service
@@ -212,7 +212,7 @@ coreos:
         Type=simple
         Restart=on-failure
         RestartSec=3
-        ExecStart=/opt/bin/rkt-v0.8.1/rkt run --debug=true --insecure-skip-verify --mds-register=false --volume etc-inventory-ansible,kind=host,source=/etc/inventory.ansible --volume opt-kraken,kind=host,source=/opt/kraken --volume opt-ansible-private-key,kind=host,source=/home/core/.ssh/ansible_rsa --volume ansible,kind=host,source=/var/run --set-env=ANSIBLE_HOST_KEY_CHECKING=False ${ansible_appc_image} -- --skip-startup-files --skip-runit -- ${ansible_playbook_command} ${ansible_playbook_file}
+        ExecStart=/opt/bin/${rkt_version}/rkt run --debug=true --insecure-skip-verify --mds-register=false --volume etc-inventory-ansible,kind=host,source=/etc/inventory.ansible --volume opt-kraken,kind=host,source=/opt/kraken --volume opt-ansible-private-key,kind=host,source=/home/core/.ssh/ansible_rsa --volume ansible,kind=host,source=/var/run --set-env=ANSIBLE_HOST_KEY_CHECKING=False ${ansible_appc_image} -- --skip-startup-files --skip-runit -- ${ansible_playbook_command} ${ansible_playbook_file}
   update:
     group: ${coreos_update_channel}
     reboot-strategy: ${coreos_reboot_strategy}

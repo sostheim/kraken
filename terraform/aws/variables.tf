@@ -285,6 +285,18 @@ variable "ansible_appc_image" {
   default = "http://appc-image-repo.s3-website-us-west-2.amazonaws.com/appc_kraken_ansible"
   description = "rkt appc image to use for ansible-in-rkt"
 }
+variable "rkt_version" {
+  default = "rkt-v0.8.1"
+  description = "rkt version"
+}
+variable "rkt_pkg_name" {
+  default = "rkt-v0.8.1.tar.gz"
+  description = "rkt package name"
+}
+variable "rkt_pkg_source_location" {
+  default = "https://github.com/coreos/rkt/releases/download/v0.8.1"
+  description = "rkt package location.  Append rkt_pkg_name for full path."
+}
 variable "dns_domain" {
   default = "kubernetes.local"
   description = "Kubenretes DNS domain"

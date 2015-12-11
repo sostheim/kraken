@@ -410,6 +410,7 @@ resource "template_file" "node_cloudinit_special" {
     kraken_commit = "${var.kraken_repo.commit_sha}"
     ansible_docker_image = "${var.ansible_docker_image}"
     ansible_appc_image = "${var.ansible_appc_image}"
+    rkt_version="${var.rkt_version}"
   }
 }
 resource "aws_instance" "kubernetes_node_special" {
@@ -490,6 +491,7 @@ resource "template_file" "node_cloudinit" {
     kraken_commit = "${var.kraken_repo.commit_sha}"
     ansible_docker_image = "${var.ansible_docker_image}"
     ansible_appc_image = "${var.ansible_appc_image}"
+    rkt_version = "${var.rkt_version}"
   }
 }
 resource "aws_launch_configuration" "kubernetes_node" {
@@ -602,6 +604,7 @@ resource "template_file" "ansible_inventory" {
     coreos_update_channel = "${var.coreos_update_channel}"
     coreos_reboot_strategy = "${var.coreos_reboot_strategy}"
     apiserver_nginx_pool = "${join(" ", concat(formatlist("server %v:8080;", aws_instance.kubernetes_apiserver.*.private_ip)))}"
+    rkt_version = "${var.rkt_version}"
   }
 
   provisioner "local-exec" {
