@@ -32,6 +32,7 @@ write_files:
       logentries_url=${logentries_url}
       master_private_ip=${master_private_ip}
       master_public_ip=${master_public_ip}
+      rkt_version=${rkt_version}
   - path: "/etc/rkt/net.d/10-containernet.conf"
     permissions: "0644"
     owner: "root"
