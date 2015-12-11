@@ -411,6 +411,8 @@ resource "template_file" "node_cloudinit_special" {
     ansible_docker_image = "${var.ansible_docker_image}"
     ansible_appc_image = "${var.ansible_appc_image}"
     rkt_version="${var.rkt_version}"
+    rkt_pkg_name="${var.rkt_pkg_name}"
+    rkt_pkg_source_location="${var.rkt_pkg_source_location}"
   }
 }
 resource "aws_instance" "kubernetes_node_special" {
@@ -492,6 +494,8 @@ resource "template_file" "node_cloudinit" {
     ansible_docker_image = "${var.ansible_docker_image}"
     ansible_appc_image = "${var.ansible_appc_image}"
     rkt_version = "${var.rkt_version}"
+    rkt_pkg_name = "${var.rkt_pkg_name}"
+    rkt_pkg_source_location = "${var.rkt_pkg_source_location}"
   }
 }
 resource "aws_launch_configuration" "kubernetes_node" {
@@ -605,6 +609,8 @@ resource "template_file" "ansible_inventory" {
     coreos_reboot_strategy = "${var.coreos_reboot_strategy}"
     apiserver_nginx_pool = "${join(" ", concat(formatlist("server %v:8080;", aws_instance.kubernetes_apiserver.*.private_ip)))}"
     rkt_version = "${var.rkt_version}"
+    rkt_pkg_name = "${var.rkt_pkg_name}"
+    rkt_pkg_source_location = "${var.rkt_pkg_source_location}"
   }
 
   provisioner "local-exec" {
