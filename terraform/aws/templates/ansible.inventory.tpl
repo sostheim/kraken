@@ -51,5 +51,5 @@ master_private_ip=${master_private_ip}
 master_public_ip=${master_public_ip}
 apiserver_nginx_pool=${apiserver_nginx_pool}
 rkt_version=${rkt_version}
-rkt_pkg_name="${var.rkt_pkg_name}"
-rkt_pkg_source_location="${var.rkt_pkg_source_location}"
+rkt_pkg_name=${var.rkt_pkg_name}
+rkt_pkg_source_location=${var.rkt_pkg_source_location}
