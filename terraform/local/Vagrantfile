@@ -119,6 +119,10 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
           kubernetes_binaries_uri
           logentries_token
           logentries_url
+          ansible_appc_image
+          rkt_version
+          rkt_pkg_name
+          rkt_pkg_source_location
         ).map { |s| [s.to_sym, ENV["KRAKEN_#{s.upcase}"]] }
         kraken_env_vars = Hash[kraken_env_var_entries]
 
