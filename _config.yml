@@ -11,6 +11,8 @@ disqus_shortname:
 #Comment out url when working locally to resolve base urls correctly
 #url:
 
+gems: [jekyll-paginate]
+
 # Owner/author information
 owner:
   name:           Samsung SDSRA
