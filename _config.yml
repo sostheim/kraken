@@ -1,5 +1,5 @@
 name: Kraken e2e tests
-markdown: redcarpet
+markdown: kramdown
 highlighter: pygments
 url: http://e2e.kubeme.io
 paginate: 10
