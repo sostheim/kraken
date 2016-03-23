@@ -1,6 +1,6 @@
 name: Kraken e2e tests
 markdown: kramdown
-highlighter: pygments
+highlighter: rouge
 url: http://e2e.kubeme.io
 paginate: 10
 description:     Kraken conformance test results
