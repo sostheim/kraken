@@ -101,7 +101,7 @@ Running kraken-up with '--clustertype/-clustertype aws' should leave you with a 
 ## Connecting to your cluster with various tools
 On a system with a Bash shell:
 
-    $ ./kraken-connect.sh --dmname DOCKER_MACHINE_NAME --clustername KUBERNETES_CLUSTER_NAME
+    $ ./kraken-connect.sh --dmname DOCKER_MACHINE_NAME --clustername KUBERNETES_CLUSTER_NAME --clustertype CLUSTER_TYPE
     Machine DOCKER_MACHINE_NAME exists.
         To control your cluster use:
         kubectl --kubeconfig=clusters/ec2/kube_config --cluster=<cluster name> <kubectl commands>
@@ -112,7 +112,7 @@ Follow the instructions in script output.
 ## Destroy Cluster
 On a system with a Bash shell:
 
-    $ ./kraken-down.sh --dmname DOCKER_MACHINE_NAME --clustername KUBERNETES_CLUSTER_NAME
+    $ ./kraken-down.sh --dmname DOCKER_MACHINE_NAME --clustername KUBERNETES_CLUSTER_NAME --clustertype CLUSTER_TYPE
     
 ## Using LogEntries.com
 1. First, create an account on logentries.com.
