@@ -307,7 +307,7 @@ variable "kraken_services_branch" {
 }
 
 variable "kraken_services_dirs" {
-  default     = "skydns cluster-monitoring kubedash prometheus"
+  default     = "kubedns cluster-monitoring kubedash prometheus"
   description = "Kraken services folders under kraken repo to deploy kubernetes services from."
 }
 
