@@ -6,7 +6,7 @@ KUBE_ROOT=${KUBE_ROOT:-"$GOPATH/src/k8s.io/kubernetes"}
 KUBE_DENSITY_NUM_NODES=${KUBE_DENSITY_NUM_NODES:-"10"} # TODO: needed? autodetect?
 KUBE_DENSITY_OUTPUT_DIR=${KUBE_DENSITY_OUTPUT_DIR:-"$(pwd)/output/density"}
 KUBE_DENSITY_PROM_PUSH_GATEWAY=""
-KUBE_DENSITY_DELETE_NAMESPACE=${KUBE_DENSITY_DELETE_NAMEPACE:-true}
+KUBE_DENSITY_DELETE_NAMESPACE=${KUBE_DENSITY_DELETE_NAMESPACE:-true}
 # TODO: external build-or-download script instead
 KUBE_DENSITY_REBUILD_TESTS=${KUBE_DENSITY_REBUILD_TESTS:-false}
 KUBE_SSH_USER=${KUBE_SSH_USER:-"core"}
@@ -26,7 +26,7 @@ KUBE_DENSITY_PODS_PER_NODE=$2
 pushd "${KUBE_ROOT}"
 # XXX: this is destructive, bad idea to use with repo under active development
 git checkout -f ${KUBE_DENSITY_BRANCH}
-KUBE_CONFORMANCE_SHA=$(git rev-parse HEAD)
+KUBE_DENSITY_SHA=$(git rev-parse HEAD)
 
 echo
 echo "Density test run start date: $(date -u)"
