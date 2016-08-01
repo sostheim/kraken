@@ -1,7 +1,7 @@
 FROM buildpack-deps:jessie-scm
 MAINTAINER Marat Garafutdinov <marat.g@samsung.com>
 
-ENV TERRAFORM_VERSION=0.6.14 \
+ENV TERRAFORM_VERSION=0.6.16 \
     TERRAFORM_EXECUTE_VERSION=v0.0.2 \
     TERRAFORM_COREOSBOX_VERSION=v0.0.1 \
     KUBERNETES_VERSION=v1.3.3
@@ -39,7 +39,7 @@ RUN wget https://releases.hashicorp.com/terraform/${TERRAFORM_VERSION}/terraform
     && rm terraform*
 
 # kubectl
-RUN wget https://github.com/GoogleCloudPlatform/kubernetes/releases/download/${KUBERNETES_VERSION}/kubernetes.tar.gz \
+RUN wget https://github.com/kubernetes/kubernetes/releases/download/${KUBERNETES_VERSION}/kubernetes.tar.gz \
     && tar -xvf kubernetes.tar.gz \
     && cp kubernetes/platforms/linux/amd64/kubectl /usr/bin \
     && rm kubernetes.tar.gz
