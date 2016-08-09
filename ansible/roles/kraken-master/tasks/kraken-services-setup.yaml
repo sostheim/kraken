@@ -7,18 +7,18 @@
   local_action: git repo={{kraken_services_repo}} dest={{services_local_path.stdout}} version={{kraken_services_branch}} accept_hostkey=yes force=yes
 
 - name: Grab all yaml files from the cloned repo
-  local_action: find paths="{{services_local_path.stdout}}" patterns="^.*?\.(?:yaml|yml)$" recurse=yes use_regex=True
-  register: k8s_local_files
+  local_action: shell find "{{services_local_path.stdout}}" -name '*.yaml' -not -path '*charts*'
+  register: k8s_local_file_paths
 
 - name: Create directories
   become: yes
-  file: path={{ item.path | dirname | regex_replace(services_local_path.stdout,'/opt/bin/kraken-services') }} state=directory
-  with_items: "{{ k8s_local_files.files }}"
+  file: path={{ item | dirname | regex_replace(services_local_path.stdout,'/opt/bin/kraken-services') }} state=directory
+  with_items: "{{ k8s_local_file_paths.stdout.split('\n') }}"
 
 - name: Render the fetched files
   become: yes
-  template: src={{ item.path }} dest={{ item.path | regex_replace(services_local_path.stdout,'/opt/bin/kraken-services') }}
-  with_items: "{{ k8s_local_files.files }}"
+  template: src={{ item }} dest={{ item | regex_replace(services_local_path.stdout,'/opt/bin/kraken-services') }}
+  with_items: "{{ k8s_local_file_paths.stdout.split('\n') }}"
 
 - name: delete local temp kraken services path
   local_action: file path={{ services_local_path.stdout }} state=absent
