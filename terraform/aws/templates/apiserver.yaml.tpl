@@ -47,9 +47,6 @@ coreos:
     etcd-servers: http://$private_ipv4:4001
     public-ip: $public_ipv4
     metadata: "role=master"
-  flannel:
-    etcd-endpoints: http://${etcd_private_ip}:4001
-    interface: $private_ipv4
   units:
     - name: format-storage.service
       command: start
@@ -88,7 +85,7 @@ coreos:
         Description=Setup Network Environment
         Requires=network-online.target
         After=network-online.target
-        Before=flanneld.service
+        Before=calico.service
 
         [Service]
         ExecStartPre=-/usr/bin/mkdir -p /opt/bin
@@ -97,17 +94,27 @@ coreos:
         ExecStart=/opt/bin/setup-network-environment
         RemainAfterExit=yes
         Type=oneshot
-    - name: flanneld.service
+    - name: calico.service
+      runtime: true
       command: start
-      drop-ins:
-        - name: 50-network-config.conf
-          content: |
-            [Unit]
-            After=flannelconfig.service
-            Before=docker.service
+      content: |
+        [Unit]
+        Description=calicoctl node
+        After=docker.service
+        Requires=docker.service
+        
+        [Service]
+        User=root
+        Environment=ETCD_AUTHORITY=${etcd_private_ip}:4001
+        PermissionsStartOnly=true
+        ExecStartPre=/usr/bin/wget -N -P /opt/bin https://github.com/projectcalico/calico-containers/releases/download/v0.20.0/calicoctl
+        ExecStartPre=/usr/bin/chmod +x /opt/bin/calicoctl
+        ExecStart=/opt/bin/calicoctl node --ip=$private_ipv4 --detach=false
+        Restart=always
+        RestartSec=10
 
-            [Service]
-            ExecStartPre=-/usr/bin/etcdctl set /coreos.com/network/config '{"Network":"10.244.0.0/14", "Backend": {"Type": "vxlan"}}'
+        [Install]
+        WantedBy=multi-user.target
     - name: fleet.service
       command: start
     - name: systemd-journal-gatewayd.socket

@@ -40,19 +40,26 @@ write_files:
         master_public_ip: ${master_public_ip}
         access_scheme: ${access_scheme}
         sysdigcloud_access_key: ${sysdigcloud_access_key}
+  # Network config file for the Calico CNI plugin.
+  - path: /etc/cni/net.d/10-calico.conf 
+    owner: root
+    permissions: 0755
+    content: |
+      {
+          "name": "calico-k8s-network",
+          "type": "calico",
+          "etcd_authority": "${etcd_private_ip}:4001",
+          "log_level": "info",
+          "ipam": {
+              "type": "calico-ipam"
+          }
+      }
 coreos:
   etcd2:
     proxy: on
     listen-client-urls: http://0.0.0.0:2379,http://0.0.0.0:4001
     advertise-client-urls: http://0.0.0.0:2379,http://0.0.0.0:4001
     initial-cluster: etcd=http://${etcd_private_ip}:2380
-  fleet:
-    etcd-servers: http://$private_ipv4:4001
-    public-ip: $private_ipv4
-    metadata: "role=node"
-  flannel:
-    etcd-endpoints: http://${etcd_private_ip}:4001
-    interface: $private_ipv4
   units:
     - name: format-storage.service
       command: start
@@ -104,7 +111,7 @@ coreos:
         Documentation=https://github.com/kelseyhightower/setup-network-environment
         Requires=network-online.target
         After=network-online.target
-        Before=flanneld.service
+        Before=calico.service
 
         [Service]
         ExecStartPre=-/usr/bin/mkdir -p /opt/bin
@@ -117,8 +124,27 @@ coreos:
       command: start
     - name: etcd2.service
       command: start
-    - name: flanneld.service
+    - name: calico.service
+      runtime: true
       command: start
+      content: |
+        [Unit]
+        Description=calicoctl node
+        After=docker.service
+        Requires=docker.service
+        
+        [Service]
+        User=root
+        Environment=ETCD_AUTHORITY=${etcd_private_ip}:4001
+        PermissionsStartOnly=true
+        ExecStartPre=/usr/bin/wget -N -P /opt/bin https://github.com/projectcalico/calico-containers/releases/download/v0.20.0/calicoctl
+        ExecStartPre=/usr/bin/chmod +x /opt/bin/calicoctl
+        ExecStart=/opt/bin/calicoctl node --ip=$private_ipv4 --detach=false
+        Restart=always
+        RestartSec=10
+
+        [Install]
+        WantedBy=multi-user.target
     - name: systemd-journal-gatewayd.socket
       command: start
       enable: yes

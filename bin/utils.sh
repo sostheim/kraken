@@ -76,6 +76,9 @@ case $key in
   AWS_CREDENTIAL_DIRECTORY="$2"
   shift
   ;;
+  --verbose)
+  KRAKEN_VERBOSE=true
+  ;;
   *)
     # unknown option
   ;;

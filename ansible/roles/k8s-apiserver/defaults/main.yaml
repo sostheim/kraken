@@ -19,6 +19,7 @@ apiserver_settings:
   max-requests-inflight: 400
   profiling: true
   runtime_config: "api/{{kubernetes_api_version}}"
+  runtime-config: "extensions/v1beta1=true,extensions/v1beta1/thirdpartyresources=true"
   secure_port: 443
   service-cluster-ip-range: "{{ cluster_ip_range }}"
   tls-cert-file: "{{ kubernetes_cert_dir }}/kube-ca.pem"
