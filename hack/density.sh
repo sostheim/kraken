@@ -2,114 +2,67 @@
 set -x
 
 KUBE_DENSITY_KUBECONFIG=${KUBE_DENSITY_KUBECONFIG:-"$HOME/.kube/config"}
-KUBE_ROOT=${KUBE_ROOT:-"$GOPATH/src/k8s.io/kubernetes"}
-KUBE_DENSITY_NUM_NODES=${KUBE_DENSITY_NUM_NODES:-"10"} # TODO: needed? autodetect?
 KUBE_DENSITY_OUTPUT_DIR=${KUBE_DENSITY_OUTPUT_DIR:-"$(pwd)/output/density"}
-KUBE_DENSITY_PROM_PUSH_GATEWAY=""
-KUBE_DENSITY_DELETE_NAMESPACE=${KUBE_DENSITY_DELETE_NAMESPACE:-true}
-# TODO: external build-or-download script instead
-KUBE_DENSITY_REBUILD_TESTS=${KUBE_DENSITY_REBUILD_TESTS:-false}
-KUBE_SSH_USER=${KUBE_SSH_USER:-"core"}
-KUBE_SSH_KEY=${KUBE_SSH_KEY:-"${AWS_SSH_KEY}"}
+KUBE_DENSITY_SSH_USER=${KUBE_DENSITY_SSH_USER:-"core"}
+KUBE_DENSITY_SSH_KEY=${KUBE_DENSITY_SSH_KEY:-"${HOME}/.ssh/id_rsa"}
 
 if [[ $# < 2 ]]; then
-  echo "Usage: $0 density_branch pods_per_node"
-  echo "Runs kubernetes density tests from the given branch"
-  echo "  eg: $0 release-1.1 3"
+  echo "Usage: $0 kubernetes_install_dir pods_per_node"
+  echo "Switches to given directory assumed to contain kubernetes binaries and runs a single density test"
+  echo "  eg: $0 ~/sandbox/kubernetes-1.3.3 10"
   exit 1
 fi
 
-KUBE_DENSITY_BRANCH=$1
+KUBE_ROOT=$1
 KUBE_DENSITY_PODS_PER_NODE=$2
 
-
 pushd "${KUBE_ROOT}"
-# XXX: this is destructive, bad idea to use with repo under active development
-git checkout -f ${KUBE_DENSITY_BRANCH}
-KUBE_DENSITY_SHA=$(git rev-parse HEAD)
 
-echo
 echo "Density test run start date: $(date -u)"
-echo "Density test branch: ${KUBE_DENSITY_BRANCH}"
-echo "Density test SHA: ${KUBE_DENSITY_SHA}"
-echo "Density test cluster size: ${KUBE_DENSITY_NUM_NODES}"
+echo "Density test dir: ${KUBE_ROOT}"
 echo "Density test kubeconfig: ${KUBE_DENSITY_KUBECONFIG}"
 
-if ${KUBE_DENSITY_REBUILD_TESTS}; then
-  echo
-  echo "Building density tests..."
-  build/make-clean.sh
-  build/run.sh hack/build-cross.sh
-fi
+function run_hack_e2e_go() {
+  # XXX: e2e-internal scripts assume KUBERNETES_PROVIDER=gce,
+  #      which assumes gcloud is present and configured; instead
+  #      set a provider that has fewer dependencies
+  export KUBERNETES_PROVIDER=aws
 
-function hack_ginkgo_e2e() {
-  # use glue from k8s for now
-  source "${KUBE_ROOT}/cluster/common.sh"
-  source "${KUBE_ROOT}/hack/lib/init.sh"
-  kube::golang::setup_env
-  ginkgo=$(kube::util::find-binary "ginkgo")
-  e2e_test=$(kube::util::find-binary "e2e.test")
+  # XXX: e2e-internal scripts require USER to be set
+  export USER=${USER:-$(whoami)}
 
-  mkdir -p ${KUBE_DENSITY_OUTPUT_DIR}
+  # avoid provider-specific e2e setup
+  export KUBERNETES_CONFORMANCE_TEST="y"
 
-  export AWS_SSH_KEY="${KUBE_SSH_KEY}"
+  # specify which cluster to talk to, and what credentials to use
+  export KUBECONFIG=${KUBE_DENSITY_KUBECONFIG}
 
-  e2e_test_args=()
-  # standard args
-  e2e_test_args+=("--repo-root=${KUBE_ROOT}")
-  e2e_test_args+=("--kubeconfig=${KUBE_DENSITY_KUBECONFIG}")
-  e2e_test_args+=("--report-dir=${KUBE_DENSITY_OUTPUT_DIR}")
-  e2e_test_args+=("--e2e-output-dir=${KUBE_DENSITY_OUTPUT_DIR}")
-  e2e_test_args+=("--prefix=e2e")
+  common_test_args=()
+  common_test_args+=("--ginkgo.v=true")
+  common_test_args+=("--ginkgo.noColor=true")
 
-  # TODO: (for which branches) are these necessary?
-  e2e_test_args+=("--num-nodes=${KUBE_DENSITY_NUM_NODES}")
+  test_args=()
+  test_args+=("--ginkgo.focus=should\sallow\sstarting\s${KUBE_DENSITY_PODS_PER_NODE}\spods\sper\snode")
+  test_args+=("--e2e-output-dir=${KUBE_DENSITY_OUTPUT_DIR}")
+  test_args+=("--report-dir=${KUBE_DENSITY_OUTPUT_DIR}")
 
+  export KUBE_SSH_USER=${KUBE_SSH_USER:-"${KUBE_DENSITY_SSH_USER}"}
   # Provider specific args are currently required for SSH access. Note that
   # https://github.com/kubernetes/kubernetes/issues/20919 suggests that we
   # would like to fix kubernetes so that --provider is no longer necessary.
-  e2e_test_args+=("--provider=aws")
-  e2e_test_args+=("--gce-zone=us-west-2")
-  e2e_test_args+=("--cluster-tag=kraken-node")
+  export AWS_SSH_KEY=${AWS_SSH_KEY:-"${KUBE_DENSITY_SSH_KEY}"}
+  test_args+=("--provider=aws")
+  test_args+=("--gce-zone=us-west-2")
 
-  if [[ ${KUBE_DENSITY_BRANCH} == "conformance-test-v1" ]]; then
-    echo "additional e2e test args for ${KUBE_DENSITY_BRANCH} branch"
-  elif [[ ${KUBE_DENSITY_BRANCH} == "release-1.0" ]]; then
-    echo "additional e2e test args for ${KUBE_DENSITY_BRANCH} branch"
-  elif [[ ${KUBE_DENSITY_BRANCH} == "release-1.1" ]]; then
-    echo "additional e2e test args for ${KUBE_DENSITY_BRANCH} branch"
-  elif [[ ${KUBE_DENSITY_BRANCH} == "master" ]]; then
-    echo "additional e2e test args for ${KUBE_DENSITY_BRANCH} branch"
-    e2e_test_args+=("--delete-namespace=${KUBE_DENSITY_DELETE_NAMESPACE}")
-  fi
-
-  if [[ -n "${KUBE_DENSITY_PROM_PUSH_GATEWAY}" ]]; then
-    e2e_test_args+=("--prom-push-gateway=${KUBE_DENSITY_PROM_PUSH_GATEWAY}")
-  fi
-
-  # ginkgo args
-  e2e_test_args+=("--ginkgo.noColor=true")
-  e2e_test_args+=("--ginkgo.v=true")
-
-  # ginkgo args for density
-  e2e_test_args+=("--ginkgo.focus=should allow starting ${KUBE_DENSITY_PODS_PER_NODE} pods per node")
-  e2e_test_args+=("--ginkgo.skip=(^Density)")
-
-  # Add path for things like running kubectl binary.
-  export PATH=$(dirname "${e2e_test}"):"${PATH}"
-
-  "${ginkgo}" "${e2e_test}" -- \
-    "${e2e_test_args[@]:+${e2e_test_args[@]}}" \
-    "${@:-}"
+  # finish up with remaining cases in serial
+  go run hack/e2e.go --v --test --test_args="${common_test_args[*]} ${test_args[*]}" --check_version_skew=false
 }
 
 echo
-echo "Running density tests..."
-hack_ginkgo_e2e
+echo "Running density test..."
+run_hack_e2e_go
 density_result=$?
 
-# restore the previous HEAD
-git checkout -
 popd
 
 echo
