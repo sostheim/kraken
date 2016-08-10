@@ -34,7 +34,8 @@
 - name: write kube config
   local_action: shell {{item}}
   with_items:
-    - kubectl --kubeconfig={{ kubeconfig | expanduser }} config set-cluster {{ cluster_name }} --server={{ master_record }} --certificate-authority={{ master_kube_config_file.stdout }}/kube-ca.pem --embed-certs=true
+    # XXX: drop explicit port from master_record if it's 80/443 to allow kubernetes e2e tests to tack on ':22' for ssh access
+    - kubectl --kubeconfig={{ kubeconfig | expanduser }} config set-cluster {{ cluster_name }} --server={{ master_record | regex_replace(':80','') | regex_replace(':443','') }} --certificate-authority={{ master_kube_config_file.stdout }}/kube-ca.pem --embed-certs=true
     - kubectl --kubeconfig={{ kubeconfig | expanduser }} config set-context {{ cluster_name }} --cluster={{ cluster_name }} --user={{ kubernetes_basic_auth_user.name }}
     - kubectl --kubeconfig={{ kubeconfig | expanduser }} config set-credentials {{ kubernetes_basic_auth_user.name }} --username={{ kubernetes_basic_auth_user.name }} --password={{ master_password }}
     - kubectl --kubeconfig={{ kubeconfig | expanduser }} config use-context {{ cluster_name }}
