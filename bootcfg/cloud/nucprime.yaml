@@ -1,0 +1,198 @@
+#cloud-config
+
+# include one or more SSH public keys
+ssh_authorized_keys:
+  - ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQC/higXZUQnL3MK2Y9KBW6YwYB0S93uafY+dxN6vOnyQYJPGwi95aQLeTCAYzjciG+JA/fvH3FGR1sTwWjzq3tUV+unGNfKfnLSWHMZ0rL9XC19mgilRFEO06fUzHbJ8ANZHS0t0xKw07wZPEUEC708M8d8SgYZjdOGdkDCE+1K+vJKPZmIfVhPjpXPGdCDHQY9CJvCp4QsaF4H7fuEXgIuc7Dj3cZo/JWjFdMSM126cKIVm5PTGRmtiwegti3jpmwZB3AENxes8zXRkZTbBPKFvRBdLo28vxBZm7dpI8jwd4N9xJmYxYcf+/2MRtJqLsy3Upzj9JtZQDpmchA0+oadA7SwGqFT5Kws08oojTaq+P8iIQ3UgCSjrilnTiJvOP97n/lwLQCqkKmu6sz/tgCcIoO3VPcGR/6P6xacXNgo2jyrbgDHbTV1xHqTEFTyujNlJab4me3Cgh1SlgwPd5AG+hcDveCt30q0hcfzPNy1h5NupUzQPQdnz+F5LC2SvRkpilCx2nKwKSHS9TU/dUli+huA3YYtCQ8637OK4ntc307hGl7PHvUZJaFlGDurBDa8pRE9yog/NRn774uEihv8h/FXHHs63lEbLH5XIlsELsWZp095mPSa7tPiCKFecRNmMSoTef0+8jbol0194ZOpqSxqlBMUWMWP1tjy0ktJeQ== nucprime.pem
+write_files:
+  - path: /opt/bin/setup-etcd2-environment
+    permissions: 0755
+    content: |
+      #!/bin/bash
+      . /etc/network-environment
+      etcd_name=$(echo ${DEFAULT_IPV4} | tr '.' '-')
+      cat >/etc/etcd2-environment <<EOS
+      ETCD_STRICT_RECONFIG_CHECK=true
+      ETCD_NAME=${etcd_name}
+      ETCD_INITIAL_CLUSTER=${etcd_name}=http://${DEFAULT_IPV4}:2380,${etcd_name}=http://${DEFAULT_IPV4}:7001
+
+      ETCD_INITIAL_ADVERTISE_PEER_URLS=http://${DEFAULT_IPV4}:2380,http://${DEFAULT_IPV4}:7001
+      ETCD_LISTEN_PEER_URLS=http://${DEFAULT_IPV4}:2380,http://${DEFAULT_IPV4}:7001
+
+      ETCD_ADVERTISE_CLIENT_URLS=http://${DEFAULT_IPV4}:2379,http://${DEFAULT_IPV4}:4001
+      ETCD_LISTEN_CLIENT_URLS=http://0.0.0.0:2379,http://0.0.0.0:4001
+      EOS
+  # TODO: this could happen at build instead of boot
+  - path: /opt/bin/fetch-bootcfg-assets
+    permissions: 0755
+    content: |
+      #!/bin/bash
+      # setup assets dir
+      assets_dir=/opt/kraken/bootcfg/assets
+      mkdir -p ${assets_dir}
+
+      # get setup-network-environment
+      mkdir -p ${assets_dir}/bin
+      wget -N -P ${assets_dir}/bin https://github.com/kelseyhightower/setup-network-environment/releases/download/v1.0.0/setup-network-environment
+      chmod +x bin/setup-network-environment
+
+      # get coreos
+      /opt/kraken/hack/bootcfg/get-coreos.sh alpha 1109.1.0 /opt/kraken/bootcfg/assets
+
+      # generate certs for k8s 
+      # TODO: hardcodes
+      num_masters=1
+      masters=IP.1=10.3.0.1,IP.2=192.168.2.5,DNS.1=nuc-01.kubeme.io
+      num_workers=4
+      workers=$(for i in $(seq 1 ${num_workers}); do printf "DNS.%d=nuc-%02d.kubeme.io," ${i} $(( ${i} + ${num_masters} )); done | sed -e 's/,$/\n/g')
+      /opt/kraken/hack/bootcfg/tls/k8s-certgen -d ${assets_dir}/tls -s 192.168.2.5 -m ${masters} -w ${workers}
+
+coreos:
+  units:
+    - name: static.network
+      runtime: true
+      content: |
+        [Match]
+        Name=enp0s25
+        [Network]
+        Address=192.168.2.4/24
+        DNS=8.8.8.8
+        Gateway=192.168.2.1
+    - name: setup-network-environment.service
+      command: start
+      content: |
+        [Unit]
+        Description=Setup Network Environment
+        Documentation=https://github.com/kelseyhightower/setup-network-environment
+        Requires=network-online.target
+        After=network-online.target
+        Before=flanneld.service
+        [Service]
+        ExecStartPre=-/usr/bin/mkdir -p /opt/bin
+        ExecStartPre=/usr/bin/wget -N -P /opt/bin https://github.com/kelseyhightower/setup-network-environment/releases/download/v1.0.0/setup-network-environment
+        ExecStartPre=/usr/bin/chmod +x /opt/bin/setup-network-environment
+        ExecStart=/opt/bin/setup-network-environment
+        RemainAfterExit=yes
+        Type=oneshot
+        [Install]
+        WantedBy=multi-user.target
+    - name: setup-etcd2-environment.service
+      command: start
+      content: |
+        [Unit]
+        Description=Setup etcd2 Environment
+        Requires=setup-network-environment.service
+        After=setup-network-environment.service
+        [Service]
+        ExecStart=/opt/bin/setup-etcd2-environment
+        RemainAfterExit=yes
+        Type=oneshot
+        [Install]
+        WantedBy=multi-user.target
+    - name: etcd2.service
+      command: start
+      drop-ins:
+        - name: 40-etcd-cluster.conf
+          content: |
+            [Unit]
+            After=setup-etcd2-environment.service
+            Requires=setup-etcd2-environment.service
+            [Service]
+            EnvironmentFile=/etc/etcd2-environment
+    - name: fleet.service
+      command: start
+      # - name: flanneld.service
+      # command: stop
+    - name: fetch-kraken.service
+      command: start
+      content: |
+        [Unit]
+        Description=clone kraken repo to /opt/kraken
+        [Service]
+        Type=oneshot
+        RemainAfterExit=yes
+        ExecStartPre=/usr/bin/rm -rf /opt/kraken
+        ExecStart=/usr/bin/git clone -b bootcfg git://github.com/spiffxp/kraken /opt/kraken
+        [Install]
+        WantedBy=multi-user.target
+    - name: fetch-kraken-services.service
+      command: start
+      content: |
+        [Unit]
+        Description=clone kraken-services repo to /opt/kraken-services
+        [Service]
+        Type=oneshot
+        RemainAfterExit=yes
+        ExecStartPre=/usr/bin/rm -rf /opt/kraken-services
+        ExecStart=/usr/bin/git clone git://github.com/samsung-cnct/kraken-services /opt/kraken-services
+        [Install]
+        WantedBy=multi-user.target
+    - name: fetch-bootcfg-assets.service
+      command: start
+      content: |
+        [Unit]
+        Description=fetch assets and place into /opt/kraken/bootcfg/assets
+        After=fetch-kraken.service
+        [Service]
+        Type=oneshot
+        RemainAfterExit=yes
+        ExecStart=/opt/bin/fetch-bootcfg-assets
+        [Install]
+        WantedBy=multi-user.target
+    - name: fetch-kubectl.service
+      command: start
+      content: |
+        [Unit]
+        Description=get kubectl into /opt/bin
+        After=network-online.target
+        [Service]
+        ExecStartPre=-/usr/bin/mkdir -p /opt/bin
+        ExecStartPre=/usr/bin/wget -N -P /opt/bin https://storage.googleapis.com/kubernetes-release/release/v1.3.3/bin/linux/amd64/kubectl
+        ExecStart=/usr/bin/chmod +x /opt/bin/kubectl
+        RemainAfterExit=yes
+        Type=oneshot
+        [Install]
+        WantedBy=multi-user.target
+    - name: bootcfg.service
+      command: start
+      content: |
+        [Unit]
+        After=fetch-bootcfg-assets.service
+        Description=run bootcfg as a docker container
+        [Service]
+        Type=simple
+        Restart=always
+        RestartSec=5
+        ExecStartPre=-/usr/bin/docker kill bootcfg
+        ExecStartPre=-/usr/bin/docker rm -f bootcfg
+        ExecStart=/usr/bin/docker run \
+          --name bootcfg \
+          --rm \
+          --volume /opt/kraken/bootcfg:/var/lib/bootcfg:Z \
+          --publish 8080:8080 \
+          quay.io/coreos/bootcfg:latest \
+            -address=0.0.0.0:8080 \
+            -log-level=debug
+        [Install]
+        WantedBy=multi-user.target
+    - name: dnsmasq.service
+      command: start
+      content: |
+        [Unit]
+        After=bootcfg.service
+        Description=run dnsmasq as a docker container
+        [Service]
+        Type=simple
+        Restart=always
+        RestartSec=5
+        ExecStartPre=-/usr/bin/docker kill dnsmasq
+        ExecStartPre=-/usr/bin/docker rm -f dnsmasq
+        ExecStart=/usr/bin/docker run \
+          --name dnsmasq \
+          --rm \
+          --cap-add=NET_ADMIN \
+          --net=host \
+          --volume /opt/kraken/bootcfg/etc/dnsmasq.conf:/etc/dnsmasq.conf:Z \
+          quay.io/coreos/dnsmasq \
+            -d
+        [Install]
+        WantedBy=multi-user.target
