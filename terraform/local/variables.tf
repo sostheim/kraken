@@ -118,7 +118,7 @@ variable "hyperkube_image" {
 }
 
 variable "kubernetes_binaries_uri" {
-  default     = "https://storage.googleapis.com/kubernetes-release/release/v1.3.2/bin/linux/amd64"
+  default     = "https://storage.googleapis.com/kubernetes-release/release/v1.3.5/bin/linux/amd64"
   description = "url to fetch hyperkube, kubectl binaries from in hyperkube_deploy_mode 'binary'"
 }
 
