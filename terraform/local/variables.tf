@@ -113,7 +113,7 @@ variable "deployment_mode" {
 }
 
 variable "hyperkube_image" {
-  default     = "gcr.io/google_containers/hyperkube:v1.3.3"
+  default     = "gcr.io/google_containers/hyperkube:v1.3.5"
   description = "image to use when running with hyperkube_deploy_mode 'docker'"
 }
 
