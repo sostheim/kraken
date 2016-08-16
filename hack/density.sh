@@ -11,7 +11,7 @@ KUBE_DENSITY_SSH_KEY=${KUBE_DENSITY_SSH_KEY:-"${HOME}/.ssh/id_rsa"}
 if [[ $# < 2 ]]; then
   echo "Usage: $0 kubernetes_install_dir pods_per_node"
   echo "Switches to given directory assumed to contain kubernetes binaries and runs a single density test"
-  echo "  eg: $0 ~/sandbox/kubernetes-1.3.3 10"
+  echo "  eg: $0 ~/sandbox/kubernetes-1.3.5 10"
   exit 1
 fi
 
