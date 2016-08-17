@@ -4,6 +4,8 @@
 #author          :Samsung SDSRA
 #==============================================================================
 
+set -x
+
 my_dir=$(dirname "${BASH_SOURCE}")
 
 # set KRAKEN_ROOT to absolute path for use in other scripts
@@ -43,44 +45,56 @@ function setup_dockermachine {
   eval ${dm_command}
 }
 
-while [[ $# > 1 ]]
+while [[ $# > 0 ]]
 do
-key="$1"
+  key="$1"
+  shift
 
-case $key in
-  --clustertype)
-  KRAKEN_CLUSTER_TYPE="$2"
-  shift
-  ;;
-  --clustername)
-  KRAKEN_CLUSTER_NAME="$2"
-  shift
-  ;;
-  --dmopts)
-  KRAKEN_DOCKER_MACHINE_OPTIONS="$2"
-  shift
-  ;;
-  --dmname)
-  KRAKEN_DOCKER_MACHINE_NAME="$2"
-  shift
-  ;;
-  --dmshell)
-  KRAKEN_DOCKER_MACHINE_SHELL="$2"
-  shift
-  ;;
-  --terraform-retries)
-  TERRAFORM_RETRIES="$2"
-  shift
-  ;;
-  --aws-credential-directory)
-  AWS_CREDENTIAL_DIRECTORY="$2"
-  shift
-  ;;
-  *)
-    # unknown option
-  ;;
-esac
-shift # past argument or value
+  if [ -z ${1+x} ]; then 
+    value=""
+  else 
+    # don't shift yet, don't know if we'll use value until key is matched
+    value="$1"
+  fi
+
+  case $key in
+    --clustertype)
+    KRAKEN_CLUSTER_TYPE=$value
+    shift
+    ;;
+    --clustername)
+    KRAKEN_CLUSTER_NAME=$value
+    shift
+    ;;
+    --dmopts)
+    KRAKEN_DOCKER_MACHINE_OPTIONS=$value
+    shift
+    ;;
+    --dmname)
+    KRAKEN_DOCKER_MACHINE_NAME=$value
+    shift
+    ;;
+    --dmshell)
+    KRAKEN_DOCKER_MACHINE_SHELL=$value
+    shift
+    ;;
+    --terraform-retries)
+    TERRAFORM_RETRIES=$value
+    shift
+    ;;
+    --aws-credential-directory)
+    AWS_CREDENTIAL_DIRECTORY=$value
+    shift
+    ;;
+    --verbose)
+    KRAKEN_VERBOSE=true
+    ;;
+    *)
+      # unknown option
+      inf "Ignoring garbage argument: $key"
+    ;;
+  esac
+
 done
 
 KRAKEN_NATIVE_DOCKER=false
@@ -144,6 +158,8 @@ fi
 # common / global variables for use in scripts
 readonly KRAKEN_CONTAINER_IMAGE_NAME="samsung_cnct/kraken:${KRAKEN_CLUSTER_NAME}"
 readonly KRAKEN_CONTAINER_NAME="kraken_cluster_${KRAKEN_CLUSTER_NAME}"
+
+exit
 
 # create the data volume container for state
 if docker inspect kraken_data &> /dev/null; then
