@@ -4,8 +4,6 @@
 #author          :Samsung SDSRA
 #==============================================================================
 
-set -x
-
 my_dir=$(dirname "${BASH_SOURCE}")
 
 # set KRAKEN_ROOT to absolute path for use in other scripts
@@ -158,8 +156,6 @@ fi
 # common / global variables for use in scripts
 readonly KRAKEN_CONTAINER_IMAGE_NAME="samsung_cnct/kraken:${KRAKEN_CLUSTER_NAME}"
 readonly KRAKEN_CONTAINER_NAME="kraken_cluster_${KRAKEN_CLUSTER_NAME}"
-
-exit
 
 # create the data volume container for state
 if docker inspect kraken_data &> /dev/null; then
