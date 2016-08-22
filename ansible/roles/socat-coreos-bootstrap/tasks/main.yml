@@ -1,0 +1,7 @@
+---
+- name: Run bootstrap.sh
+  become: yes
+  script: bootstrap.sh creates={{utils_path}}/socat
+  environment:
+    SOCAT_URL: "{{socat_url}}"
+    UTILS_PATH: "{{utils_path}}"

@@ -2,7 +2,7 @@
 set -x
 
 KUBE_CONFORMANCE_KUBECONFIG=${KUBE_CONFORMANCE_KUBECONFIG:-"$HOME/.kube/config"}
-KUBE_CONFORMANCE_OUTPUT_DIR=${KUBE_CONFORMANCE_OUTPUT_DIR:-"$(pwd)/output/conformance"}
+KUBE_CONFORMANCE_OUTPUT_DIR=${KUBE_CONFORMANCE_OUTPUT_DIR:-"$(pwd)/output/conformance/serial"}
 
 if [[ $# < 1 ]]; then
   echo "Usage: $0 conformance_branch"
@@ -40,8 +40,8 @@ function run_hack_e2e_go() {
 
   test_args=()
   test_args+=("--ginkgo.focus=\[Serial\].*\[Conformance\]")
-  test_args+=("--e2e-output-dir=${KUBE_CONFORMANCE_OUTPUT_DIR}/serial")
-  test_args+=("--report-dir=${KUBE_CONFORMANCE_OUTPUT_DIR}/serial")
+  test_args+=("--e2e-output-dir=${KUBE_CONFORMANCE_OUTPUT_DIR}")
+  test_args+=("--report-dir=${KUBE_CONFORMANCE_OUTPUT_DIR}")
 
   # finish up with remaining cases in serial
   go run hack/e2e.go --v --test --test_args="${common_test_args[*]} ${test_args[*]}" --check_version_skew=false
