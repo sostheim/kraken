@@ -1,4 +1,13 @@
 ---
+- name: Create k8s-docker-kubelet drop-in path
+  file: path=/etc/systemd/system/k8s-docker-kubelet.service.d state=directory
+  become: yes
+
+- name: Create k8s-docker-kubelet path dropin
+  template: src=10-override-path.conf.jinja2
+            dest=/etc/systemd/system/k8s-docker-kubelet.service.d/10-override-path.conf
+  become: yes
+
 - name: Create k8s-docker-kubelet
   template: src=k8s-docker-kubelet.service.jinja2
             dest=/etc/systemd/system/k8s-docker-kubelet.service
