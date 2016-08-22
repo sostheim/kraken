@@ -37,6 +37,18 @@ write_files:
         access_port: "${access_port}"
         access_scheme: ${access_scheme}
         sysdigcloud_access_key: ${sysdigcloud_access_key}
+  - path: /etc/cni/net.d/10-cninet.conf
+    content: |
+      {
+        "name": "cninet",
+        "type": "flannel",
+        "subnetFile": "/var/run/flannel/subnet.env",
+        "delegate": {
+          "bridge": "mynet0",
+          "mtu": 1450,
+          "isDefaultGateway": true
+        }
+      }
 coreos:
   etcd2:
     proxy: on
@@ -108,6 +120,17 @@ coreos:
 
             [Service]
             ExecStartPre=-/usr/bin/etcdctl set /coreos.com/network/config '{"Network":"10.244.0.0/14", "Backend": {"Type": "vxlan"}}'
+      content: |
+        [Unit]
+        Description=Flannel CNI Service
+        Documentation=https://github.com/containernetworking/cni/blob/master/Documentation/flannel.md
+        Requires=etcd2.service
+
+        [Service]
+        ExecStartPre=-/usr/bin/mkdir -p /opt/cni
+        ExecStartPre=/usr/bin/wget -N -P /opt/cni https://storage.googleapis.com/kubernetes-release/network-plugins/cni-8a936732094c0941e1543ef5d292a1f4fffa1ac5.tar.gz
+        ExecStartPre=/usr/bin/tar -xzf /opt/cni/cni-8a936732094c0941e1543ef5d292a1f4fffa1ac5.tar.gz -C /opt/cni/
+        ExecStartPre=/usr/bin/rm /opt/cni/cni-8a936732094c0941e1543ef5d292a1f4fffa1ac5.tar.gz
     - name: fleet.service
       command: start
     - name: systemd-journal-gatewayd.socket
