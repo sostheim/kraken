@@ -1,7 +1,5 @@
 FROM phusion/baseimage
 
-ENV ANSIBLE_VERSION 2.0.1.0
-
 RUN apt-get update \
     && apt-get install -y \
       ca-certificates \
