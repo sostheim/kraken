@@ -44,7 +44,7 @@ write_files:
         "type": "flannel",
         "subnetFile": "/var/run/flannel/subnet.env",
         "delegate": {
-          "bridge": "mynet0",
+          "bridge": "cni0",
           "mtu": 1450,
           "isDefaultGateway": true
         }
@@ -124,13 +124,44 @@ coreos:
         [Unit]
         Description=Flannel CNI Service
         Documentation=https://github.com/containernetworking/cni/blob/master/Documentation/flannel.md
-        Requires=etcd2.service
+        Requires=early-docker.service
+	After=etcd2.service early-docker.service
+        Before=early-docker.target
 
         [Service]
-        ExecStartPre=-/usr/bin/mkdir -p /opt/cni
+	# Flannel Service
+	Type=notify
+	Restart=always
+	RestartSec=5
+	Environment="TMPDIR=/var/tmp/"
+	Environment="FLANNEL_VER=0.5.5"
+	Environment="FLANNEL_IMG=quay.io/coreos/flannel"
+	Environment="FLANNEL_ENV_FILE=/run/flannel/options.env"
+	ExecStartPre=/usr/bin/mkdir -p /run/flannel
+	ExecStartPre=-/usr/bin/touch ${FLANNEL_ENV_FILE}
+
+	# CNI options
+	ExecStartPre=-/usr/bin/mkdir -p /opt/cni
         ExecStartPre=/usr/bin/wget -N -P /opt/cni https://storage.googleapis.com/kubernetes-release/network-plugins/cni-8a936732094c0941e1543ef5d292a1f4fffa1ac5.tar.gz
         ExecStartPre=/usr/bin/tar -xzf /opt/cni/cni-8a936732094c0941e1543ef5d292a1f4fffa1ac5.tar.gz -C /opt/cni/
         ExecStartPre=/usr/bin/rm /opt/cni/cni-8a936732094c0941e1543ef5d292a1f4fffa1ac5.tar.gz
+
+	ExecStart=/usr/libexec/sdnotify-proxy /run/flannel/sd.sock \
+	  /usr/bin/docker run --net=host --privileged=true --rm \
+	    --voluame=/run/flannel:/run/flannel \
+	    --env=NOTIFY_SOCKET=/run/flannel/sd.sock \
+	    --env-file=${FLANNEL_ENV_FILE} \
+	    --volume=/usr/share/ca-certificates:/etc/ssl/certs:ro \
+	    --volume=${ETCD_SSL_DIR}:${ETCD_SSL_DIR}:ro \
+	      ${FLANNEL_IMG}:${FLANNEL_VER} /opt/bin/flanneld --ip-masq=true
+
+	# Update docker options
+	ExecStartPost=/usr/bin/docker run --net=host --rm --volume=/run:/run \
+	  ${FLANNEL_IMG}:${FLANNEL_VER} \
+	  /opt/bin/mk-docker-opts.sh -d /run/flannel_docker_opts.env -i
+
+	[Install]
+	WantedBy=multi-user.target
     - name: fleet.service
       command: start
     - name: systemd-journal-gatewayd.socket
