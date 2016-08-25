@@ -158,7 +158,7 @@ coreos:
 	Environment="FLANNEL_IMG=quay.io/coreos/flannel"
 	Environment="FLANNEL_ENV_FILE=/run/flannel/options.env"
 	ExecStartPre=/usr/bin/mkdir -p /run/flannel
-	ExecStartPre=-/usr/bin/touch ${FLANNEL_ENV_FILE}
+	ExecStartPre=-/usr/bin/touch /run/flannel/options.env
 
 	# CNI options
 	ExecStartPre=-/usr/bin/mkdir -p /opt/cni
