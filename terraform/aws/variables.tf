@@ -44,7 +44,7 @@ variable "max_retries" {
 }
 
 variable "aws_region" {
-  default     = "us-west-2"
+  default     = "us-east-1"
   description = "AWS region"
 }
 
