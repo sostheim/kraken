@@ -145,43 +145,43 @@ coreos:
         Description=Flannel CNI Service
         Documentation=https://github.com/containernetworking/cni/blob/master/Documentation/flannel.md
         Requires=early-docker.service
-	After=etcd2.service
-	After=early-docker.service
+        After=etcd2.service
+        After=early-docker.service
         Before=early-docker.target
 
         [Service]
-	# Flannel Service
-	Type=notify
-	Restart=always
-	RestartSec=5
-	Environment="TMPDIR=/var/tmp/"
-	Environment="FLANNEL_VER=0.5.5"
-	Environment="FLANNEL_IMG=quay.io/coreos/flannel"
-	Environment="FLANNEL_ENV_FILE=/run/flannel/options.env"
-	ExecStartPre=/usr/bin/mkdir -p /run/flannel
-	ExecStartPre=-/usr/bin/touch /run/flannel/options.env
+        # Flannel Service
+        Type=notify
+        Restart=always
+        RestartSec=5
+        Environment="TMPDIR=/var/tmp/"
+        Environment="FLANNEL_VER=0.5.5"
+        Environment="FLANNEL_IMG=quay.io/coreos/flannel"
+        Environment="FLANNEL_ENV_FILE=/run/flannel/options.env"
+        ExecStartPre=/usr/bin/mkdir -p /run/flannel
+        ExecStartPre=-/usr/bin/touch /run/flannel/options.env
 
-	# CNI options
-	ExecStartPre=-/usr/bin/mkdir -p /opt/cni
+        # CNI options
+        ExecStartPre=-/usr/bin/mkdir -p /opt/cni
         ExecStartPre=/usr/bin/wget -N -P /opt/cni https://storage.googleapis.com/kubernetes-release/network-plugins/cni-8a936732094c0941e1543ef5d292a1f4fffa1ac5.tar.gz
         ExecStartPre=/usr/bin/tar -xzf /opt/cni/cni-8a936732094c0941e1543ef5d292a1f4fffa1ac5.tar.gz -C /opt/cni/
         ExecStartPre=/usr/bin/rm /opt/cni/cni-8a936732094c0941e1543ef5d292a1f4fffa1ac5.tar.gz
 
-	ExecStart=/usr/libexec/sdnotify-proxy /run/flannel/sd.sock \
-	  /usr/bin/docker run --net=host --privileged=true --rm \
-	    --voluame=/run/flannel:/run/flannel \
-	    --env=NOTIFY_SOCKET=/run/flannel/sd.sock \
-	    --env-file=/run/flannel/options.env \
-	    --volume=/usr/share/ca-certificates:/etc/ssl/certs:ro \
-	      quay.io/coreos/flannel:0.5.5 /opt/bin/flanneld --ip-masq=true
+        ExecStart=/usr/libexec/sdnotify-proxy /run/flannel/sd.sock \
+          /usr/bin/docker run --net=host --privileged=true --rm \
+            --voluame=/run/flannel:/run/flannel \
+            --env=NOTIFY_SOCKET=/run/flannel/sd.sock \
+            --env-file=/run/flannel/options.env \
+            --volume=/usr/share/ca-certificates:/etc/ssl/certs:ro \
+              quay.io/coreos/flannel:0.5.5 /opt/bin/flanneld --ip-masq=true
 
-	# Update docker options
-	ExecStartPost=/usr/bin/docker run --net=host --rm --volume=/run:/run \
-	  quay.io/coreos/flannel:0.5.5 \
-	  /opt/bin/mk-docker-opts.sh -d /run/flannel_docker_opts.env -i
+        # Update docker options
+        ExecStartPost=/usr/bin/docker run --net=host --rm --volume=/run:/run \
+          quay.io/coreos/flannel:0.5.5 \
+          /opt/bin/mk-docker-opts.sh -d /run/flannel_docker_opts.env -i
 
-	[Install]
-	WantedBy=multi-user.target
+        [Install]
+        WantedBy=multi-user.target
     - name: systemd-journal-gatewayd.socket
       command: start
       enable: yes
