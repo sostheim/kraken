@@ -125,7 +125,8 @@ coreos:
         Description=Flannel CNI Service
         Documentation=https://github.com/containernetworking/cni/blob/master/Documentation/flannel.md
         Requires=early-docker.service
-	After=etcd2.service early-docker.service
+	After=etcd2.service
+	After=early-docker.service
         Before=early-docker.target
 
         [Service]
