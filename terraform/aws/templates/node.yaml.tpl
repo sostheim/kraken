@@ -170,14 +170,13 @@ coreos:
 	  /usr/bin/docker run --net=host --privileged=true --rm \
 	    --voluame=/run/flannel:/run/flannel \
 	    --env=NOTIFY_SOCKET=/run/flannel/sd.sock \
-	    --env-file=${FLANNEL_ENV_FILE} \
+	    --env-file=/run/flannel/options.env \
 	    --volume=/usr/share/ca-certificates:/etc/ssl/certs:ro \
-	    --volume=${ETCD_SSL_DIR}:${ETCD_SSL_DIR}:ro \
-	      ${FLANNEL_IMG}:${FLANNEL_VER} /opt/bin/flanneld --ip-masq=true
+	      quay.io/coreos/flannel:0.5.5 /opt/bin/flanneld --ip-masq=true
 
 	# Update docker options
 	ExecStartPost=/usr/bin/docker run --net=host --rm --volume=/run:/run \
-	  ${FLANNEL_IMG}:${FLANNEL_VER} \
+	  quay.io/coreos/flannel:0.5.5 \
 	  /opt/bin/mk-docker-opts.sh -d /run/flannel_docker_opts.env -i
 
 	[Install]
