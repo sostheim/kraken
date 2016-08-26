@@ -148,7 +148,7 @@ coreos:
         ExecStartPre=/usr/bin/rm /opt/cni/cni-8a936732094c0941e1543ef5d292a1f4fffa1ac5.tar.gz
 
         ExecStart=/usr/bin/docker run --net=host --privileged=true --rm \
-            --voluame=/run/flannel:/run/flannel \
+            --volume=/run/flannel:/run/flannel \
             --env=NOTIFY_SOCKET=/run/flannel/sd.sock \
             --env-file=/run/flannel/options.env \
             --volume=/usr/share/ca-certificates:/etc/ssl/certs:ro \
