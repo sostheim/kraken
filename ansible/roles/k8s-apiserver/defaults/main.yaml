@@ -10,6 +10,8 @@ apiserver_settings:
   # raise delete-collection-workers from default of 1 to support 5m e2e test namespace deletion threshold
   delete-collection-workers: 16
   etcd-servers: "http://{{etcd_private_ip}}:4001"
+  # Cloud Provider to use, especially important when provisioning a persisten volume, empty if local.
+  cloud-provider: "{{ cloud_provider | default('auto-detect') }}"
   # TODO: enable this once we've got a separate etcd instance
   # etcd-servers-overrides: "/events#http://{{etcd_private_ip}}:4001"
   event-ttl: 1h0m0s
