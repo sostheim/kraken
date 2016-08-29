@@ -48,7 +48,6 @@ write_files:
         "subnetFile": "/var/run/flannel/subnet.env",
         "delegate": {
           "bridge": "cni0",
-          "mtu": 1450,
           "isDefaultGateway": true
         }
       }
