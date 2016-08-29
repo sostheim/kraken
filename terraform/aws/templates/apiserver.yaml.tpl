@@ -150,7 +150,7 @@ coreos:
             --privileged=true \
             --volume=/run/flannel:/run/flannel \
             --env-file=/run/flannel/options.env \
-            quay.io/coreos/flannel:0.5.5 /opt/bin/flanneld --ip-masq=true --iface=eth0 -v=1
+            quay.io/coreos/flannel:0.5.5 /opt/bin/flanneld --ip-masq=true --iface=eth0
 
         ExecStartPost=/usr/bin/docker run \
             --rm \
