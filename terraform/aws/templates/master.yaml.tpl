@@ -143,9 +143,6 @@ coreos:
         Restart=always
         RestartSec=5
         Environment="TMPDIR=/var/tmp/"
-        Environment="FLANNEL_VER=0.5.5"
-        Environment="FLANNEL_IMG=quay.io/coreos/flannel"
-        Environment="FLANNEL_ENV_FILE=/run/flannel/options.env"
         ExecStartPre=/usr/bin/mkdir -p /run/flannel
         ExecStartPre=-/usr/bin/touch /run/flannel/options.env
 
@@ -155,17 +152,19 @@ coreos:
         ExecStartPre=/usr/bin/tar -xzf /opt/cni/cni-8a936732094c0941e1543ef5d292a1f4fffa1ac5.tar.gz -C /opt/cni/
         ExecStartPre=/usr/bin/rm /opt/cni/cni-8a936732094c0941e1543ef5d292a1f4fffa1ac5.tar.gz
 
-        ExecStart=/usr/bin/docker run --net=host --privileged=true --rm \
+        ExecStart=/usr/bin/docker run \
+            --d \
+            --net=host \
+            --privileged=true \
             --volume=/run/flannel:/run/flannel \
-            --env=NOTIFY_SOCKET=/run/flannel/sd.sock \
             --env-file=/run/flannel/options.env \
-            --volume=/usr/share/ca-certificates:/etc/ssl/certs:ro \
-              quay.io/coreos/flannel:0.5.5 /opt/bin/flanneld --ip-masq=true
+            quay.io/coreos/flannel:0.5.5 /opt/bin/flanneld --ip-masq=true --iface=eth0 -v=1
 
-        # Update docker options
-        ExecStartPost=/usr/bin/docker run --net=host --rm --volume=/run:/run \
-          quay.io/coreos/flannel:0.5.5 \
-          /opt/bin/mk-docker-opts.sh -d /run/flannel_docker_opts.env -i
+        ExecStartPost=/usr/bin/docker run \
+            --rm \
+            --net=host \
+            --volume=/run:/run \
+            quay.io/coreos/flannel:0.5.5 /opt/bin/mk-docker-opts.sh -d /run/flannel_docker_opts.env -i
 
         [Install]
         WantedBy=multi-user.target
