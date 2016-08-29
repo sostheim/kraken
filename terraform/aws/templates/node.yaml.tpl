@@ -151,7 +151,7 @@ coreos:
 
         [Service]
         # Flannel Service
-        Type=notify
+        Type=simple
         Restart=always
         RestartSec=5
         Environment="TMPDIR=/var/tmp/"
