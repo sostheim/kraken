@@ -40,7 +40,6 @@ write_files:
         master_public_ip: ${master_public_ip}
         access_scheme: ${access_scheme}
         sysdigcloud_access_key: ${sysdigcloud_access_key}
-        cloud_provider: aws
 coreos:
   etcd2:
     proxy: on
