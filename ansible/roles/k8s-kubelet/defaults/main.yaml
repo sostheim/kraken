@@ -1,6 +1,8 @@
 ---
 utils_path: /opt/bin
 kubelet_settings:
+  # Cloud Provider to use, especially important when provisioning a persisten volume, empty if local.
+  cloud-provider: "{{ cloud_provider | default('auto-detect') }}"
   address: 0.0.0.0
   alsologtostderr: false
   api-servers: "{{access_scheme}}://{{ master_private_ip }}:{{access_port}}"

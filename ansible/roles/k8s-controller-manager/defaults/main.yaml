@@ -1,5 +1,7 @@
 ---
 controller_manager_settings:
+  # Cloud Provider to use, especially important when provisioning a persisten volume, empty if local.
+  cloud-provider: "{{ cloud_provider | default('auto-detect') }}"
   address: 0.0.0.0
   alsologtostderr: false
   concurrent-endpoint-syncs: 5
