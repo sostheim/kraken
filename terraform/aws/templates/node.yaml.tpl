@@ -165,7 +165,7 @@ coreos:
         ExecStartPre=/usr/bin/rm /opt/cni/cni-8a936732094c0941e1543ef5d292a1f4fffa1ac5.tar.gz
 
         ExecStart=/usr/bin/docker run \
-            -d \
+            --rm \
             --net=host \
             --privileged=true \
             --volume=/run/flannel:/run/flannel \
