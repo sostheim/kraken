@@ -319,6 +319,8 @@ resource "template_file" "apiserver_cloudinit" {
     logentries_token          = "${var.logentries_token}"
     logentries_url            = "${var.logentries_url}"
     sysdigcloud_access_key    = "${var.sysdigcloud_access_key}"
+    cni_version               = "${var.cni_version}"
+    flannel_version           = "${var.flannel_version}"
   }
 }
 
@@ -396,6 +398,8 @@ resource "template_file" "master_cloudinit" {
     short_name                = "master"
     sysdigcloud_access_key    = "${var.sysdigcloud_access_key}"
     thirdparty_scheduler      = "${var.thirdparty_scheduler}"
+    cni_version               = "${var.cni_version}"
+    flannel_version           = "${var.flannel_version}"
   }
 }
 
@@ -473,6 +477,8 @@ resource "template_file" "node_cloudinit_special" {
     proxy_record               = "${replace(var.aws_user_prefix,"_","-")}-${replace(var.cluster_name,"_","-")}-proxy.${var.aws_cluster_domain}"
     short_name                 = "node-${format("%03d", count.index+1)}"
     sysdigcloud_access_key     = "${var.sysdigcloud_access_key}"
+    cni_version                = "${var.cni_version}"
+    flannel_version            = "${var.flannel_version}"
   }
 }
 
@@ -560,6 +566,8 @@ resource "template_file" "node_cloudinit" {
     proxy_record                = "${replace(var.aws_user_prefix,"_","-")}-${replace(var.cluster_name,"_","-")}-proxy.${var.aws_cluster_domain}"
     short_name                  = "autoscaled"
     sysdigcloud_access_key      = "${var.sysdigcloud_access_key}"
+    cni_version                 = "${var.cni_version}"
+    flannel_version             = "${var.flannel_version}"
   }
 }
 
