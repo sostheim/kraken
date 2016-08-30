@@ -1,0 +1,10 @@
+{
+  "id": "default",
+  "name": "etcd2",
+  "profile": "etcd2",
+  "metadata": {
+    "etcd_discovery_uri": "http://etcd.kubeme.io:2379/v2/keys/_etcd/registry/my-etcd2-cluster",
+    "setup_network_environment_uri": "http://bootcfg.kubeme.io:8080/assets/bin/setup-network-environment",
+    "ssh_authorized_keys": ["ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQC/higXZUQnL3MK2Y9KBW6YwYB0S93uafY+dxN6vOnyQYJPGwi95aQLeTCAYzjciG+JA/fvH3FGR1sTwWjzq3tUV+unGNfKfnLSWHMZ0rL9XC19mgilRFEO06fUzHbJ8ANZHS0t0xKw07wZPEUEC708M8d8SgYZjdOGdkDCE+1K+vJKPZmIfVhPjpXPGdCDHQY9CJvCp4QsaF4H7fuEXgIuc7Dj3cZo/JWjFdMSM126cKIVm5PTGRmtiwegti3jpmwZB3AENxes8zXRkZTbBPKFvRBdLo28vxBZm7dpI8jwd4N9xJmYxYcf+/2MRtJqLsy3Upzj9JtZQDpmchA0+oadA7SwGqFT5Kws08oojTaq+P8iIQ3UgCSjrilnTiJvOP97n/lwLQCqkKmu6sz/tgCcIoO3VPcGR/6P6xacXNgo2jyrbgDHbTV1xHqTEFTyujNlJab4me3Cgh1SlgwPd5AG+hcDveCt30q0hcfzPNy1h5NupUzQPQdnz+F5LC2SvRkpilCx2nKwKSHS9TU/dUli+huA3YYtCQ8637OK4ntc307hGl7PHvUZJaFlGDurBDa8pRE9yog/NRn774uEihv8h/FXHHs63lEbLH5XIlsELsWZp095mPSa7tPiCKFecRNmMSoTef0+8jbol0194ZOpqSxqlBMUWMWP1tjy0ktJeQ== nucprime.pem"]
+  }
+}
