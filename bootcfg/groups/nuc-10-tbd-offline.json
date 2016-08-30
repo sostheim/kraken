@@ -1,0 +1,22 @@
+{
+  "id": "nuc-10-tbd-offline",
+  "name": "nuc-10-tbd-offline",
+  "profile": "k8s-worker",
+  "selector": {
+    "mac": "b8:ae:ed:75:93:c9"
+  },
+  "metadata": {
+    "etcd_initial_cluster": "node1=http://192.168.2.5:2380",
+    "ipv4_address": "192.168.2.14",
+    "k8s_cert_endpoint": "http://bootcfg.kubeme.io:8080/assets",
+    "k8s_controller_endpoint": "https://192.168.2.5",
+    "k8s_dns_service_ip": "10.3.0.10",
+    "k8s_etcd_endpoints": "http://192.168.2.5:2379",
+    "k8s_version": "v1.3.3_coreos.0",
+    "networkd_address": "192.168.2.12/24",
+    "networkd_dns": "192.168.2.4",
+    "networkd_gateway": "192.168.2.1",
+    "pxe": "true",
+    "ssh_authorized_keys": ["ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQC/higXZUQnL3MK2Y9KBW6YwYB0S93uafY+dxN6vOnyQYJPGwi95aQLeTCAYzjciG+JA/fvH3FGR1sTwWjzq3tUV+unGNfKfnLSWHMZ0rL9XC19mgilRFEO06fUzHbJ8ANZHS0t0xKw07wZPEUEC708M8d8SgYZjdOGdkDCE+1K+vJKPZmIfVhPjpXPGdCDHQY9CJvCp4QsaF4H7fuEXgIuc7Dj3cZo/JWjFdMSM126cKIVm5PTGRmtiwegti3jpmwZB3AENxes8zXRkZTbBPKFvRBdLo28vxBZm7dpI8jwd4N9xJmYxYcf+/2MRtJqLsy3Upzj9JtZQDpmchA0+oadA7SwGqFT5Kws08oojTaq+P8iIQ3UgCSjrilnTiJvOP97n/lwLQCqkKmu6sz/tgCcIoO3VPcGR/6P6xacXNgo2jyrbgDHbTV1xHqTEFTyujNlJab4me3Cgh1SlgwPd5AG+hcDveCt30q0hcfzPNy1h5NupUzQPQdnz+F5LC2SvRkpilCx2nKwKSHS9TU/dUli+huA3YYtCQ8637OK4ntc307hGl7PHvUZJaFlGDurBDa8pRE9yog/NRn774uEihv8h/FXHHs63lEbLH5XIlsELsWZp095mPSa7tPiCKFecRNmMSoTef0+8jbol0194ZOpqSxqlBMUWMWP1tjy0ktJeQ== nucprime.pem"]
+  }
+}

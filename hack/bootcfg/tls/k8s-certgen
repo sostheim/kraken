@@ -1,0 +1,44 @@
+#!/bin/bash -e
+
+TLS_SCRIPTS_ROOT=$( cd $(dirname "${BASH_SOURCE}") && pwd )
+
+USAGE="Usage: $(basename $0)
+Options:
+  -d DEST     Destination for generated files (default: .examples/assets/tls)
+  -s SERVER   Reachable Server IP for kubeconfig (e.g. 172.15.0.21)
+  -m MASTERS  Master Node Names/Addresses in SAN format (e.g. IP.1=10.3.0.1,IP.2=172.15.0.21).
+  -w WORKERS  Worker Node Names/Addresses in SAN format (e.g. IP.1=172.15.0.22,IP.2=172.15.0.23)
+  -h          Show help.
+"
+
+DEST="./examples/assets/tls"
+SERVER="172.15.0.21"
+MASTERS="IP.1=10.3.0.1,IP.2=172.15.0.21"
+WORKERS="IP.1=172.15.0.22,IP.2=172.15.0.23"
+
+while getopts "d:s:m:w:vh" opt; do
+  case $opt in
+    d) DEST="$OPTARG" ;;
+    s) SERVER="$OPTARG" ;;
+    m) MASTERS="$OPTARG" ;;
+    w) WORKERS="$OPTARG" ;;
+    h) echo "$USAGE"; exit;;
+    *) exit 1;;
+  esac
+done
+
+if [ ! -d "$DEST" ]; then
+  echo "Creating directory $DEST"
+  mkdir -p $DEST
+fi
+
+# create root CA
+${TLS_SCRIPTS_ROOT}/root-ca $DEST
+
+# create Kubernetes master and worker certificates
+${TLS_SCRIPTS_ROOT}/kubernetes-cert $DEST admin kube-admin
+${TLS_SCRIPTS_ROOT}/kubernetes-cert $DEST apiserver kube-apiserver $MASTERS
+${TLS_SCRIPTS_ROOT}/kubernetes-cert $DEST worker kube-worker $WORKERS
+
+# create a kubeconfig
+${TLS_SCRIPTS_ROOT}/kube-conf $DEST $SERVER

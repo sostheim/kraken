@@ -1,0 +1,78 @@
+---
+systemd:
+  units:
+    - name: setup-network-environment.service
+      enable: true
+      contents: |
+        [Unit]
+        Requires=network-online.target
+        After=network-online.target
+
+        [Service]
+        ExecStartPre=-/usr/bin/mkdir -p /opt/bin
+        ExecStartPre=/usr/bin/wget -N -P /opt/bin {{.setup_network_environment_uri}} 
+        ExecStartPre=/usr/bin/chmod +x /opt/bin/setup-network-environment
+        ExecStart=/opt/bin/setup-network-environment
+        RemainAfterExit=yes
+        Type=oneshot
+
+        [Install]
+        WantedBy=multi-user.target
+    - name: setup-etcd2-environment.service
+      enable: true
+      contents: |
+        [Unit]
+        Description=Setup etcd2 Environment
+        Requires=setup-network-environment.service
+        After=setup-network-environment.service
+
+        [Service]
+        ExecStart=/opt/bin/setup-etcd2-environment
+        RemainAfterExit=yes
+        Type=oneshot
+
+        [Install]
+        WantedBy=multi-user.target
+    - name: etcd2.service
+      enable: true
+      dropins:
+        - name: 40-etcd-cluster.conf
+          contents: |
+            [Unit]
+            After=setup-etcd2-environment.service
+            Requires=setup-etcd2-environment.service
+
+            [Service]
+            EnvironmentFile=/etc/etcd2-environment
+
+storage:
+  files:
+    - path: /opt/bin/setup-etcd2-environment
+      filesystem: root
+      mode: 0755
+      contents:
+        inline: |
+          #!/bin/bash
+          . /etc/network-environment
+          etcd_name=$(echo ${DEFAULT_IPV4} | tr '.' '-')
+          cat >/etc/etcd2-environment <<EOS
+          ETCD_STRICT_RECONFIG_CHECK=true
+          ETCD_NAME=${etcd_name}
+          ETCD_DISCOVERY={{.etcd_discovery_uri}}
+
+          ETCD_INITIAL_ADVERTISE_PEER_URLS=http://${DEFAULT_IPV4}:2380,http://${DEFAULT_IPV4}:7001
+          ETCD_LISTEN_PEER_URLS=http://${DEFAULT_IPV4}:2380,http://${DEFAULT_IPV4}:7001
+
+          ETCD_ADVERTISE_CLIENT_URLS=http://${DEFAULT_IPV4}:2379,http://${DEFAULT_IPV4}:4001
+          ETCD_LISTEN_CLIENT_URLS=http://0.0.0.0:2379,http://0.0.0.0:4001
+          EOS
+
+{{ if index . "ssh_authorized_keys" }}
+passwd:
+  users:
+    - name: core
+      ssh_authorized_keys:
+        {{ range $element := .ssh_authorized_keys }}
+        - {{$element}}
+        {{end}}
+{{end}}

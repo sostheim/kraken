@@ -1,7 +1,6 @@
 README.html
 .vagrant*
 README_local*
-tls*
 temp_*
 .DS_Store
 **/terraform.tfstate
@@ -20,3 +19,4 @@ density/*
 density_out/*
 .idea
 *~
+bootcfg/assets
