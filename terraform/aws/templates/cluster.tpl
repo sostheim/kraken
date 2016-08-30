@@ -24,3 +24,4 @@ access_port: ${access_port}
 master_private_ip: ${master_private_ip}
 access_scheme: ${access_scheme}
 sysdigcloud_access_key: ${sysdigcloud_access_key}
+cloud_provider: aws
