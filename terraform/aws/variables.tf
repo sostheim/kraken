@@ -415,3 +415,13 @@ variable "cluster_passwd" {
   default     = "kraken"
   description = "password to use for basic auth on the completed cluster"
 }
+
+variable "flannel_version" {
+  default     = "0.5.5"
+  description = "CoreOS Flannel image release version"
+}
+
+variable "cni_version" {
+  default     = "8a936732094c0941e1543ef5d292a1f4fffa1ac5"
+  description = "CNI binaries tarfile artifact release version identifier"
+}

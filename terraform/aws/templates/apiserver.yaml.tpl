@@ -139,9 +139,9 @@ coreos:
 
         # CNI options
         ExecStartPre=-/usr/bin/mkdir -p /opt/cni
-        ExecStartPre=/usr/bin/wget -N -P /opt/cni https://storage.googleapis.com/kubernetes-release/network-plugins/cni-8a936732094c0941e1543ef5d292a1f4fffa1ac5.tar.gz
-        ExecStartPre=/usr/bin/tar -xzf /opt/cni/cni-8a936732094c0941e1543ef5d292a1f4fffa1ac5.tar.gz -C /opt/cni/
-        ExecStartPre=/usr/bin/rm /opt/cni/cni-8a936732094c0941e1543ef5d292a1f4fffa1ac5.tar.gz
+        ExecStartPre=/usr/bin/wget -N -P /opt/cni https://storage.googleapis.com/kubernetes-release/network-plugins/cni-${cni_version}.tar.gz
+        ExecStartPre=/usr/bin/tar -xzf /opt/cni/cni-${cni_version}.tar.gz -C /opt/cni/
+        ExecStartPre=/usr/bin/rm /opt/cni/cni-${cni_version}.tar.gz
 
         ExecStart=/usr/bin/docker run \
             --rm \
@@ -149,13 +149,13 @@ coreos:
             --privileged=true \
             --volume=/run/flannel:/run/flannel \
             --env-file=/run/flannel/options.env \
-            quay.io/coreos/flannel:0.5.5 /opt/bin/flanneld --ip-masq=true --iface=eth0
+            quay.io/coreos/flannel:${flannel_version} /opt/bin/flanneld --ip-masq=true --iface=eth0
 
         ExecStartPost=/usr/bin/docker run \
             --rm \
             --net=host \
             --volume=/run:/run \
-            quay.io/coreos/flannel:0.5.5 /opt/bin/mk-docker-opts.sh -d /run/flannel_docker_opts.env -i
+            quay.io/coreos/flannel:${flannel_version} /opt/bin/mk-docker-opts.sh -d /run/flannel_docker_opts.env -i
 
         [Install]
         WantedBy=multi-user.target
