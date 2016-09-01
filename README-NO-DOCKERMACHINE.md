@@ -135,7 +135,7 @@ The next steps detail how to obtain the necessary Samsung terraform providers
 	
 ## Install latest [kubectl](https://github.com/GoogleCloudPlatform/kubernetes/releases/latest). Make sure ```kubectl``` is in your PATH
 
-    wget https://github.com/kubernetes/kubernetes/releases/download/v1.3.5/kubernetes.tar.gz
+    wget https://github.com/kubernetes/kubernetes/releases/download/v1.3.6/kubernetes.tar.gz
     tar xvzf kubernetes.tar.gz
     sudo cp ./kubernetes/platforms/linux/amd64/kubectl /usr/local/bin/
 
