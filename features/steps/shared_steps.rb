@@ -10,6 +10,10 @@ When(/^I kubectl system services/) do
   run_simple("kubectl --kubeconfig=#{ENV['KUBECONFIG']} --cluster=#{ENV['CUKE_CLUSTER']} get services --namespace=kube-system")
 end
 
+When(/^I kubectl system pods/) do
+  run_simple("kubectl --kubeconfig=#{ENV['KUBECONFIG']} --cluster=#{ENV['CUKE_CLUSTER']} get pods --namespace=kube-system")
+end
+
 When(/^I kubectl services/) do 
   run_simple("kubectl --kubeconfig=#{ENV['KUBECONFIG']} --cluster=#{ENV['CUKE_CLUSTER']} get services")
 end
