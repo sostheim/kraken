@@ -10,13 +10,14 @@ KUBE_DENSITY_SSH_KEY=${KUBE_DENSITY_SSH_KEY:-"${HOME}/.ssh/id_rsa"}
 
 if [[ $# < 2 ]]; then
   echo "Usage: $0 kubernetes_install_dir pods_per_node"
-  echo "Switches to given directory assumed to contain kubernetes binaries and runs a single density test"
-  echo "  eg: $0 ~/sandbox/kubernetes-1.3.6 10"
+  echo "Run density test from specified dir with the specified densities"
+  echo "  eg: $0 ~/sandbox/kubernetes-1.3.6 3 30"
   exit 1
 fi
 
 KUBE_ROOT=$1
-KUBE_DENSITY_PODS_PER_NODE=$2
+shift
+DENSITIES=$*
 
 pushd "${KUBE_ROOT}"
 
@@ -48,8 +49,9 @@ function run_hack_e2e_go() {
   common_test_args+=("--ginkgo.v=true")
   common_test_args+=("--ginkgo.noColor=true")
 
+  density_regex=$(echo "${DENSITIES}" | tr ' ' '|')
   test_args=()
-  test_args+=("--ginkgo.focus=should\sallow\sstarting\s${KUBE_DENSITY_PODS_PER_NODE}\spods\sper\snode")
+  test_args+=("--ginkgo.focus=should\sallow\sstarting\s(${density_regex})\spods\sper\snode")
   test_args+=("--e2e-output-dir=${KUBE_DENSITY_OUTPUT_DIR}")
   test_args+=("--report-dir=${KUBE_DENSITY_OUTPUT_DIR}")
 
