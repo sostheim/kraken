@@ -24,7 +24,7 @@ Feature: Make sure we have the correct kubernetes resources
       .*
       heapster.*
       kube-dns.*
-      kubedash.*
+      kubernetes-dashboard.*
       monitoring-grafana.*
       monitoring-influxdb.*
       """
@@ -37,7 +37,7 @@ Feature: Make sure we have the correct kubernetes resources
       .*
       heapster.*Running.*
       kube-dns.*Running.*
-      kubedash.*Running.*
+      kubernetes-dashboard.*Running.*
       monitoring-influxdb-grafana.*Running.*
       """
 
