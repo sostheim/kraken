@@ -11,7 +11,7 @@ KUBE_DENSITY_SSH_KEY=${KUBE_DENSITY_SSH_KEY:-"${HOME}/.ssh/id_rsa"}
 if [[ $# < 2 ]]; then
   echo "Usage: $0 kubernetes_install_dir pods_per_node"
   echo "Run density test from specified dir with the specified densities"
-  echo "  eg: $0 ~/sandbox/kubernetes-1.3.6 3 30"
+  echo "  eg: $0 ~/sandbox/kubernetes-1.3.7 3 30"
   exit 1
 fi
 
