@@ -4,7 +4,7 @@ MAINTAINER Marat Garafutdinov <marat.g@samsung.com>
 ENV TERRAFORM_VERSION=0.6.16 \
     TERRAFORM_EXECUTE_VERSION=v0.0.2 \
     TERRAFORM_COREOSBOX_VERSION=v0.0.1 \
-    KUBERNETES_VERSION=v1.3.5
+    KUBERNETES_VERSION=v1.3.7
 
 # system dependencie
 RUN apt-get update \
@@ -39,10 +39,9 @@ RUN wget https://releases.hashicorp.com/terraform/${TERRAFORM_VERSION}/terraform
     && rm terraform*
 
 # kubectl
-RUN wget https://github.com/kubernetes/kubernetes/releases/download/${KUBERNETES_VERSION}/kubernetes.tar.gz \
-    && tar -xvf kubernetes.tar.gz \
-    && cp kubernetes/platforms/linux/amd64/kubectl /usr/bin \
-    && rm kubernetes.tar.gz
+RUN wget -O /usr/bin/kubectl \
+      https://storage.googleapis.com/kubernetes-release/release/${KUBERNETES_VERSION}/bin/linux/amd64/kubectl \
+    && chmod +x /usr/bin/kubectl
 
 # generate a keypair
 RUN ssh-keygen -q -t rsa -N '' -f /root/.ssh/id_rsa
